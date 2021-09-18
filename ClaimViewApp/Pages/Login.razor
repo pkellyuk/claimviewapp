@@ -1,0 +1,53 @@
+﻿@using ClaimViewApp.Data
+@using ClaimViewApp.Models;
+@inject IJSRuntime JSRuntime
+
+<h3>Login</h3>
+
+<div id="login">
+    Username:<input id="username" @bind="web_username" />
+    Password:<input id="pass" @bind="web_password" />
+    <button type="submit" @onclick="UserLogin">View My Claims</button>
+</div>
+
+<div id="claims">
+    @if (claimid != -1)
+    {
+        <ClaimView claimId="@claimid" @ref="ClaimViewComponent"></ClaimView>
+    }
+</div>
+
+
+@code {
+    private int claimid = -1;
+    private string web_username;
+    private string web_password;
+    private UserModel user;
+    private ClaimView ClaimViewComponent;
+
+    private async Task UserLogin()
+    {
+        await Task.Run(() =>
+        {
+
+            user = ClaimViewService.LoginUser(web_username, web_password);
+            if (user != null)
+            {
+                if (user.Active == false)
+                {
+                    JSRuntime.InvokeVoidAsync("alert", "user inactive");
+                }
+                else
+                {
+                    claimid = user.UserId;
+                    if(ClaimViewComponent!=null)
+                    ClaimViewComponent.RefreshMe();
+                }
+            }
+            else
+            {
+                JSRuntime.InvokeVoidAsync("alert", "Failed to login");
+            }
+        });
+    }
+}

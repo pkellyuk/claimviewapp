@@ -1,0 +1,64 @@
+﻿@page "/claimview"
+
+@using ClaimViewApp.Data
+@using ClaimViewApp.Models; 
+
+<h1>ClaimView</h1>
+
+<p>Your Claims</p>
+
+@if (claims == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ClaimId</th>
+                <th>Reference</th>
+                <th>Date Created</th>
+                <th>Date Cosed</th>
+                <th>Last Updated</th>
+                <th>Loss Type</th>
+                <th>Loss Location</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var claim in claims)
+            {
+            <tr>
+                <td>@claim.Id.ToString()</td>
+                <td>@claim.Reference.ToString()</td>
+                <td>@claim.CreatedDate.ToLongDateString()</td>
+                <td>@claim.ClosedDate.ToLongDateString()</td>
+                <td>@claim.LastUpdatedDate.ToLongDateString()</td>
+                <td>@claim.LossTypeDesc.ToString()</td>
+                @if (!string.IsNullOrEmpty(claim.LossLoc))
+                {
+                    <td>@claim.LossLoc.ToString()</td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int claimId { get; set; }
+    private List<ClaimModel> claims;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(claimId!=-1)
+            await Task.Run(() => {claims = ClaimViewService.GetClaimById(claimId); });
+    }
+
+    public void RefreshMe()
+    {        
+        InvokeAsync(() => StateHasChanged());
+    }
+}
